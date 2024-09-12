@@ -1,0 +1,46 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+}
+
+@model AcmeCorp.Web.Models.PaginatedListViewModel
+
+<h1>Prize Draw Entries</h1>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Customer name</th>
+            <th>Email</th>
+            <th>Serial number</th>
+            <th>Time of entry</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var entry in Model.Entries)
+        {
+            <tr>
+                <td>@entry.FullName</td>
+                <td>@entry.Email</td>
+                <td>@entry.SerialNumber</td>
+                <td>@entry.EntryTime</td>
+                <td>
+                    <a>Remove</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<div class="pagination">
+    @if (Model.HasPreviousPage)
+    {
+            <a href="@Url.Action("List", new { pageNumber = Model.PageNumber - 1, pageSize = Model.PageSize })">Previous</a>
+    }
+
+    @if (Model.HasNextPage)
+    {
+            <a href="@Url.Action("List", new { pageNumber = Model.PageNumber + 1, pageSize = Model.PageSize })">Next</a>
+    }
+</div>
