@@ -23,9 +23,12 @@
         public static void GenerateSerialNumberFile(int numCount)
         {
             //string path = AppDomain.CurrentDomain.BaseDirectory;
-            string path = ".";
+            //string path = ".";
+            string currentPath = Directory.GetCurrentDirectory(); // Gets the current directory
+            string pathTwoLevelsUp = Path.Combine(currentPath, "..", "..");
+            string fullPath = Path.GetFullPath(pathTwoLevelsUp);
 
-            using (StreamWriter outputFile = new StreamWriter(Path.Combine(path, "serial_numbers.txt")))
+            using (StreamWriter outputFile = new StreamWriter(Path.Combine(fullPath, "serial_numbers.txt")))
             {
                 for (var i = 0; i < numCount; i++)
                 {
