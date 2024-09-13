@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace AcmeCorp.Web.Models
+namespace AcmeCorp.Data.Models
 {
     public class AddEntryViewModel
     {

@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 
-namespace AcmeCorp.Web.Models.Entities
+namespace AcmeCorp.Data.Models.Entities
 {
     public class SerialNumber
     {

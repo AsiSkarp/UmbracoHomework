@@ -1,45 +1,49 @@
-using AcmeCorp.Web.Data;
-using AcmeCorp.Web.Models;
-using AcmeCorp.Web.Models.Entities;
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
+using AcmeCorp.Data.Db;
+using AcmeCorp.Data.Models.Entities;
+using AcmeCorp.Data.Models;
+using AcmeCorp.Service.Services;
 
 namespace AcmeCorp.Web.Controllers
 {
     public class HomeController : Controller
     {
         private readonly ILogger<HomeController> _logger;
-        private readonly ApplicationDbContext dbContext;
+        private readonly ISerialService _serialService;
+        //private readonly ApplicationDbContext dbContext;
 
-        public HomeController(ILogger<HomeController> logger, ApplicationDbContext dbContext)
+        public HomeController(ILogger<HomeController> logger, ISerialService serialService)
         {
             _logger = logger;
-            this.dbContext = dbContext;
+            _serialService = serialService;
+            //this.dbContext = dbContext;
         }
 
         [HttpGet]
         public IActionResult Index()
         {
-            if (!dbContext.SerialNumbers.Any())
-            {
-                string txtPath = ".\\serial_numbers.txt";
+            _serialService.OccupySerialNumberDatabase();
+            //if (!dbContext.SerialNumbers.Any())
+            //{
+            //    string txtPath = ".\\serial_numbers.txt";
 
-                using (StreamReader reader = new StreamReader(txtPath))
-                {
-                    string line;
-                    while ((line = reader.ReadLine()) != null)
-                    {
-                        line = line.Trim();
-                        var sn = new SerialNumber
-                        {
-                            Serial = line
-                        };
+            //    using (StreamReader reader = new StreamReader(txtPath))
+            //    {
+            //        string line;
+            //        while ((line = reader.ReadLine()) != null)
+            //        {
+            //            line = line.Trim();
+            //            var sn = new SerialNumber
+            //            {
+            //                Serial = line
+            //            };
 
-                        dbContext.SerialNumbers.Add(sn);
-                    }
-                }
-                dbContext.SaveChanges();
-            }
+            //            dbContext.SerialNumbers.Add(sn);
+            //        }
+            //    }
+            //    dbContext.SaveChanges();
+            //}
 
             return View();
         }

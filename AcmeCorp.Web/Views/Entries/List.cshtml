@@ -4,7 +4,7 @@
 @{
 }
 
-@model AcmeCorp.Web.Models.PaginatedListViewModel
+@model AcmeCorp.Data.Models.PaginatedListViewModel
 
 <h1>Prize Draw Entries</h1>
 
@@ -25,9 +25,11 @@
                 <td>@entry.Email</td>
                 <td>@entry.SerialNumber</td>
                 <td>@entry.EntryTime</td>
-                <td>
-                    <a>Remove</a>
-                </td>
+                <!--<td>
+                    <button type="submit" class="btn btn-danger ms-3" 
+                            asp-action="Delete"
+                            asp-asp-controller="Entries">Remove</button>
+                </td>-->
             </tr>
         }
     </tbody>
@@ -37,6 +39,11 @@
     @if (Model.HasPreviousPage)
     {
             <a href="@Url.Action("List", new { pageNumber = Model.PageNumber - 1, pageSize = Model.PageSize })">Previous</a>
+    }
+
+    @if (Model.HasPreviousPage && Model.HasNextPage)
+    {
+        <div>...</div>
     }
 
     @if (Model.HasNextPage)

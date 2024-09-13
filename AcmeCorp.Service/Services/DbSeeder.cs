@@ -1,4 +1,4 @@
-﻿namespace AcmeCorp.Lib
+﻿namespace AcmeCorp.Service.Services
 
 {
     using System;

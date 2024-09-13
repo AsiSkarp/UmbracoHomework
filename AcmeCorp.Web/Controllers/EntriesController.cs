@@ -1,18 +1,21 @@
-﻿using AcmeCorp.Web.Data;
-using AcmeCorp.Web.Models;
-using AcmeCorp.Web.Models.Entities;
+﻿using AcmeCorp.Data.Models;
+using AcmeCorp.Data.Models.Entities;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Authorization;
+using AcmeCorp.Service.Services;
 
 namespace AcmeCorp.Web.Controllers
 {
     public class EntriesController : Controller
     {
-        private readonly ApplicationDbContext dbContext;
 
-        public EntriesController(ApplicationDbContext dbContext)
+        private readonly IEntryService _entryService;
+        private readonly ISerialService _serialService;
+
+        public EntriesController(IEntryService entryService, ISerialService serialService)
         {
-            this.dbContext = dbContext;
+            _entryService = entryService;
+            _serialService = serialService;
         }
 
         [HttpGet]
@@ -24,9 +27,7 @@ namespace AcmeCorp.Web.Controllers
         [HttpPost]
         public async Task<IActionResult> Add(AddEntryViewModel viewModel)
         {
-            var customer = await dbContext.Customers
-                .FirstOrDefaultAsync(
-                c => c.Email == viewModel.Email);
+            var customer = await _entryService.GetCustomerAsyncByEmailAsync(viewModel.Email);
 
             if (customer == null)
             {
@@ -38,53 +39,47 @@ namespace AcmeCorp.Web.Controllers
                     DateOfBirth = viewModel.DateOfBirth.Date,
                 };
 
-                await dbContext.Customers.AddAsync(customer);
-                await dbContext.SaveChangesAsync();
+                await _entryService.SubmitCustomerAsync(customer);
             }
 
-            var age = DateTime.Now.Year - viewModel.DateOfBirth.Year;
-            if (viewModel.DateOfBirth > DateTime.Now.AddYears(-age)) age--;
+            var entry = new Entry
+            {
+                SerialNumber = viewModel.Serial,
+                CustomerId = customer.Id,
+                EntryTime = DateTime.Now
+            };
 
-            if (age < 18)
+            var validAge = await _entryService.ValidateAge(viewModel);
+
+            if (validAge)
             {
                 ViewBag.NotificationMessage = "You must be over 18 to enter into the prize draw.";
                 return View(viewModel);
             }
 
-            var serialNumber = await dbContext.SerialNumbers
-                .FirstOrDefaultAsync(s => s.Serial == viewModel.Serial);
+            var hasSerial = await _serialService.IsSerialNumberInDatabaseAsync(viewModel.Serial);
 
-            if (serialNumber == null)
+            if (hasSerial)
             {
                 ViewBag.NotificationMessage = "Invalid serial number. Please enter valid serial number.";
                 return View(viewModel);
             }
 
-            var existingEntries= await dbContext.Entries
-                .Where(e => e.SerialNumber == serialNumber.Serial)
-                .ToListAsync();
+            var existingEntries = await _entryService.ValidateExistingEntries(viewModel.Serial, customer.Id);
+  
 
-            if (existingEntries.Count == 0)
+            if (existingEntries.Item1 < 2)
             {
                 await HandleEntry(
                     View(viewModel),
-                    serialNumber.Serial,
+                    entry.SerialNumber,
                     customer.Id,
-                    "You have successfully entered once into the prize draw. You may enter the prize draw once more for this serial number"
+                    existingEntries.Item2
                     );
             }
-            else if (existingEntries.Count == 1 && existingEntries[0].CustomerId == customer.Id)
+            else if (existingEntries.Item1 == 2)
             {
-                await HandleEntry(
-                    View(viewModel),
-                    serialNumber.Serial,
-                    customer.Id,
-                    "You have successfully entered twice for the prize draw. You may enter into the prize draw for any other valid serial number(s)"
-                    );
-            }
-            else if (existingEntries.Count == 2 || (existingEntries.Count == 1 && existingEntries[0].CustomerId != customer.Id )) 
-            {
-                ViewBag.NotificationMessage = "This serial number already been entered twice, or is registered to another user. Please input another serial number.";
+                ViewBag.NotificationMessage = existingEntries.Item2;
                 return View(viewModel);
             }
 
@@ -100,45 +95,32 @@ namespace AcmeCorp.Web.Controllers
                 EntryTime = DateTime.Now
             };
 
-            await dbContext.Entries.AddAsync(entry);
-            await dbContext.SaveChangesAsync();
+            await _entryService.SubmitEntryAsync(entry);
             ViewBag.NotificationMessage = notificationMessage;
             return view;
         }
 
+
         [HttpGet]
         public async Task<IActionResult> List(int pageNumber = 1, int pageSize = 10)
         {
-            var query = from entry in dbContext.Entries
-                        join customer in dbContext.Customers
-                        on entry.CustomerId equals customer.Id
-                        select new ListEntryViewModel
-                        {
-                            FullName = customer.FirstName + " " + customer.LastName,
-                            Email = customer.Email,
-                            SerialNumber = entry.SerialNumber,
-                            EntryTime = entry.EntryTime
-                        };
-
-            int totalRecords = await query.CountAsync();
-
-            var pagedResults = await query
-                                     .Skip((pageNumber - 1) * pageSize)
-                                     .Take(pageSize)
-                                     .ToListAsync();
-
-            var viewModel = new PaginatedListViewModel
-            {
-                Entries = pagedResults,
-                PageNumber = pageNumber,
-                PageSize = pageSize,
-                TotalRecords = totalRecords
-            };
-
+            var viewModel = await _entryService.GetPaginatedEntriesAsync(pageNumber, pageSize);
             return View(viewModel);
-            //var results = await query.ToListAsync();
-            
-            //return View(results);
         }
+
+        //[HttpPost]
+        //public async Task<IActionResult> Delete(Entry viewModel)
+        //{
+        //    var entry = await dbContext.Entries
+        //        .FindAsync(viewModel.Id);
+
+        //    if (entry != null)
+        //    {
+        //        dbContext.Entries.Remove(entry);
+        //        await dbContext.SaveChangesAsync();
+        //    }
+
+        //    return RedirectToAction("List");
+        //}
     }
 }

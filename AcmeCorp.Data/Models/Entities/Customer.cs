@@ -1,7 +1,6 @@
-﻿using Microsoft.AspNetCore.Components.Forms;
-using System.ComponentModel.DataAnnotations.Schema;
+﻿using System.ComponentModel.DataAnnotations.Schema;
 
-namespace AcmeCorp.Web.Models.Entities
+namespace AcmeCorp.Data.Models.Entities
 {
     public class Customer
     {
