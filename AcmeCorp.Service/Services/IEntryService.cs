@@ -4,7 +4,8 @@ namespace AcmeCorp.Service.Services
 {
     public interface IEntryService
     {
-        Task<bool> ValidateAge(AddEntryViewModel viewModel);
+        Task<bool> ValidateModelAsync(AddEntryViewModel viewModel);
+        Task<bool> ValidateAgeAsync(AddEntryViewModel viewModel);
         Task<(int, string)> ValidateExistingEntries(string serial, int customerId);
         Task SubmitEntryAsync(Entry entry);
         Task<Customer> GetCustomerAsyncByEmailAsync(string email);

@@ -1,6 +1,9 @@
 ﻿using AcmeCorp.Data.Models.Entities;
 using AcmeCorp.Data.Models;
 using AcmeCorp.Data.Repositories;
+using System.ComponentModel.DataAnnotations;
+using System.Text.RegularExpressions;
+using System.Globalization;
 
 namespace AcmeCorp.Service.Services
 {
@@ -15,13 +18,12 @@ namespace AcmeCorp.Service.Services
             _customerRepository = customerRepository;
         }
 
-        public async Task<bool> ValidateAge(AddEntryViewModel viewModel)
+        public async Task<bool> ValidateAgeAsync(AddEntryViewModel viewModel)
         {
             var customer = await _customerRepository.GetCustomerByEmailAsync(viewModel.Email);
             var age = DateTime.Now.Year - customer.DateOfBirth.Year;
             if (customer.DateOfBirth > DateTime.Now.AddYears(-age)) age--;
             return age < 18; 
-            //return false;
         }
 
         public async Task<(int, string)> ValidateExistingEntries(string serial, int customerId)
@@ -70,6 +72,86 @@ namespace AcmeCorp.Service.Services
                 PageSize = pageSize,
                 TotalRecords = totalRecords
             };
+        }
+
+        public async Task<bool> ValidateModelAsync(AddEntryViewModel viewModel)
+        {
+            if (isValidString(viewModel.FirstName) && 
+                isValidString(viewModel.LastName) && 
+                isValidEmail(viewModel.Email) && 
+                isValidSerial(viewModel.Serial) && 
+                isValidAge(viewModel.DateOfBirth))
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        private bool isValidString(string validationString)
+        {
+            switch (validationString)
+            {
+                case string a when string.IsNullOrEmpty(a): return false;
+                case string a when a.Length > 50: return false;
+                case string a when a.Any(char.IsDigit): return false;
+            }
+            return true;
+        }
+
+        private bool isValidEmail(string email)
+        {
+            if (string.IsNullOrWhiteSpace(email))
+                return false;
+
+            try
+            {
+                email = Regex.Replace(email, @"(@)(.+)$", DomainMapper,
+                                      RegexOptions.None, TimeSpan.FromMilliseconds(200));
+
+                string DomainMapper(Match match)
+                {
+                    var idn = new IdnMapping();
+
+                    string domainName = idn.GetAscii(match.Groups[2].Value);
+
+                    return match.Groups[1].Value + domainName;
+                }
+            }
+            catch (RegexMatchTimeoutException e)
+            {
+                return false;
+            }
+            catch (ArgumentException e)
+            {
+                return false;
+            }
+
+            try
+            {
+                return Regex.IsMatch(email,
+                    @"^[^@\s]+@[^@\s]+\.[^@\s]+$",
+                    RegexOptions.IgnoreCase, TimeSpan.FromMilliseconds(250));
+            }
+            catch (RegexMatchTimeoutException)
+            {
+                return false;
+            }
+        }
+
+        private bool isValidSerial(string serial)
+        {
+            var serialPattern = "^ACME-([A-Z0-9]{3}-){2}[A-Z0-9]{3}$";
+            return Regex.IsMatch(serial, serialPattern);
+        }
+
+        private bool isValidAge(DateTime dateOfBirth)
+        {
+            var age = DateTime.Now.Year - dateOfBirth.Year;
+            if (dateOfBirth > DateTime.Now.AddYears(-age)) age--;
+            return age > 18;
         }
     }
 

@@ -27,6 +27,13 @@ namespace AcmeCorp.Web.Controllers
         [HttpPost]
         public async Task<IActionResult> Add(AddEntryViewModel viewModel)
         {
+            var modelIsValid = await _entryService.ValidateModelAsync(viewModel);
+            if (!modelIsValid)
+            {
+                ViewBag.NotificationMessage = "Invalid information. Please re-enter valid information";
+                return View(viewModel);
+            }
+
             var customer = await _entryService.GetCustomerAsyncByEmailAsync(viewModel.Email);
 
             if (customer == null)
@@ -49,7 +56,7 @@ namespace AcmeCorp.Web.Controllers
                 EntryTime = DateTime.Now
             };
 
-            var validAge = await _entryService.ValidateAge(viewModel);
+            var validAge = await _entryService.ValidateAgeAsync(viewModel);
 
             if (validAge)
             {
