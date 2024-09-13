@@ -11,40 +11,17 @@ namespace AcmeCorp.Web.Controllers
     {
         private readonly ILogger<HomeController> _logger;
         private readonly ISerialService _serialService;
-        //private readonly ApplicationDbContext dbContext;
 
         public HomeController(ILogger<HomeController> logger, ISerialService serialService)
         {
             _logger = logger;
             _serialService = serialService;
-            //this.dbContext = dbContext;
         }
 
         [HttpGet]
         public IActionResult Index()
         {
             _serialService.OccupySerialNumberDatabase();
-            //if (!dbContext.SerialNumbers.Any())
-            //{
-            //    string txtPath = ".\\serial_numbers.txt";
-
-            //    using (StreamReader reader = new StreamReader(txtPath))
-            //    {
-            //        string line;
-            //        while ((line = reader.ReadLine()) != null)
-            //        {
-            //            line = line.Trim();
-            //            var sn = new SerialNumber
-            //            {
-            //                Serial = line
-            //            };
-
-            //            dbContext.SerialNumbers.Add(sn);
-            //        }
-            //    }
-            //    dbContext.SaveChanges();
-            //}
-
             return View();
         }
 
