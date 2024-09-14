@@ -51,6 +51,11 @@ namespace AcmeCorp.Service.Services
             await _entryRepository.AddEntryAsync(entry);
         }
 
+        public async Task<List<Customer>> GetCustomersAsync()
+        {
+            return await _customerRepository.GetCustomersAsync();
+        }
+
         public async Task<Customer> GetCustomerAsyncByEmailAsync(string email)
         {
             return await _customerRepository.GetCustomerByEmailAsync(email);

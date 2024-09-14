@@ -21,6 +21,7 @@ builder.Services.AddScoped<ISerialNumberRepository, SerialNumberRepository>();
 builder.Services.AddScoped<IEntryService, EntryService>();
 builder.Services.AddScoped<ISerialService, SerialService>();
 
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

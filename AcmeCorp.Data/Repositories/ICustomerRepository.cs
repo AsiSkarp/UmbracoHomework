@@ -9,6 +9,7 @@ namespace AcmeCorp.Data.Repositories
 {
     public interface ICustomerRepository
     {
+        Task<List<Customer>> GetCustomersAsync();
         Task<Customer> GetCustomerByEmailAsync(string email);
         Task AddCustomerAsync(Customer customer);
     }

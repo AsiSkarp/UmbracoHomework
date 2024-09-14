@@ -12,6 +12,11 @@ namespace AcmeCorp.Data.Repositories
             this.dbContext = dbContext;
         }
 
+        public async Task<List<Customer>> GetCustomersAsync()
+        {
+            return await dbContext.Customers.ToListAsync();
+        }
+
         public async Task<Customer> GetCustomerByEmailAsync(string email)
         {
             return await dbContext.Customers.FirstOrDefaultAsync(c => c.Email == email);

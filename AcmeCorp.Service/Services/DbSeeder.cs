@@ -1,8 +1,11 @@
 ﻿namespace AcmeCorp.Service.Services
 
 {
+    using AcmeCorp.Data.Repositories;
     using System;
+    using System.Diagnostics;
     using System.Linq;
+    using System.Threading.Tasks;
 
     public class DbSeeder
     {
@@ -22,8 +25,7 @@
 
         public static void GenerateSerialNumberFile(int numCount)
         {
-            //string path = AppDomain.CurrentDomain.BaseDirectory;
-            //string path = ".";
+
             string currentPath = Directory.GetCurrentDirectory(); // Gets the current directory
             string pathTwoLevelsUp = Path.Combine(currentPath, "..", "..");
             string fullPath = Path.GetFullPath(pathTwoLevelsUp);
