@@ -1,7 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
-using AcmeCorp.Data.Db;
-using AcmeCorp.Data.Models.Entities;
 using AcmeCorp.Data.Models;
 using AcmeCorp.Service.Services;
 
@@ -21,7 +19,7 @@ namespace AcmeCorp.Web.Controllers
         [HttpGet]
         public IActionResult Index()
         {
-            _serialService.OccupySerialNumberDatabase();
+            //_serialService.OccupySerialNumberDatabase();
             return View();
         }
 

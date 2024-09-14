@@ -19,14 +19,16 @@ namespace AcmeCorp.Web.Controllers
         }
 
         [HttpGet]
-        public IActionResult Add()
+        public async Task<IActionResult> Add()
         {
+            await _serialService.OccupySerialNumberDatabase();
             return View();
         }
 
         [HttpPost]
         public async Task<IActionResult> Add(AddEntryViewModel viewModel)
         {
+            
             var modelIsValid = await _entryService.ValidateModelAsync(viewModel);
             if (!modelIsValid)
             {
@@ -61,14 +63,6 @@ namespace AcmeCorp.Web.Controllers
             if (validAge)
             {
                 ViewBag.NotificationMessage = "You must be over 18 to enter into the prize draw.";
-                return View(viewModel);
-            }
-
-            var hasSerial = await _serialService.IsSerialNumberInDatabaseAsync(viewModel.Serial);
-
-            if (hasSerial)
-            {
-                ViewBag.NotificationMessage = "Invalid serial number. Please enter valid serial number.";
                 return View(viewModel);
             }
 
@@ -114,20 +108,5 @@ namespace AcmeCorp.Web.Controllers
             var viewModel = await _entryService.GetPaginatedEntriesAsync(pageNumber, pageSize);
             return View(viewModel);
         }
-
-        //[HttpPost]
-        //public async Task<IActionResult> Delete(Entry viewModel)
-        //{
-        //    var entry = await dbContext.Entries
-        //        .FindAsync(viewModel.Id);
-
-        //    if (entry != null)
-        //    {
-        //        dbContext.Entries.Remove(entry);
-        //        await dbContext.SaveChangesAsync();
-        //    }
-
-        //    return RedirectToAction("List");
-        //}
     }
 }
